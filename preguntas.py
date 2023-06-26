@@ -15,25 +15,29 @@ tbl2 = pd.read_csv("tbl2.tsv", sep="\t")
 
 
 def pregunta_01():
-    """
-    ¿Cuál es la cantidad de filas en la tabla `tbl0.tsv`?
+  """
+  ¿Cuál es la cantidad de filas en la tabla `tbl0.tsv`?
 
-    Rta/
-    40
+  Rta/
+  40
 
-    """
-    return
+  """
+  respuesta = len(tbl0)
+  return respuesta
+
 
 
 def pregunta_02():
-    """
-    ¿Cuál es la cantidad de columnas en la tabla `tbl0.tsv`?
+  """
+  ¿Cuál es la cantidad de columnas en la tabla `tbl0.tsv`?
 
-    Rta/
-    4
+  Rta/
+  4
 
-    """
-    return
+  """
+  respuesta = len(tbl0.columns)
+  return respuesta
+
 
 
 def pregunta_03():
@@ -50,7 +54,9 @@ def pregunta_03():
     Name: _c1, dtype: int64
 
     """
-    return
+    respuesta = tbl0.groupby('_c1')['_c1'].count()
+    return respuesta
+
 
 
 def pregunta_04():
@@ -65,7 +71,9 @@ def pregunta_04():
     E    4.785714
     Name: _c2, dtype: float64
     """
-    return
+    respuesta = tbl0.groupby('_c1')['_c2'].mean()
+    return respuesta
+
 
 
 def pregunta_05():
@@ -82,7 +90,8 @@ def pregunta_05():
     E    9
     Name: _c2, dtype: int64
     """
-    return
+    respuesta = tbl0.groupby('_c1')['_c2'].max()
+    return respuesta
 
 
 def pregunta_06():
@@ -94,7 +103,8 @@ def pregunta_06():
     ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 
     """
-    return
+    respuesta = [x.upper() for x in sorted(tbl1['_c4'].unique().tolist())]
+    return respuesta
 
 
 def pregunta_07():
@@ -110,7 +120,8 @@ def pregunta_07():
     E    67
     Name: _c2, dtype: int64
     """
-    return
+    respuesta = tbl0.groupby('_c1').sum()['_c2']
+    return respuesta
 
 
 def pregunta_08():
@@ -128,7 +139,8 @@ def pregunta_08():
     39   39   E    5  1998-01-26    44
 
     """
-    return
+    respuesta = tbl0.assign(suma=tbl0['_c0'] + tbl0['_c2'])
+    return respuesta
 
 
 def pregunta_09():
@@ -146,61 +158,68 @@ def pregunta_09():
     39   39   E    5  1998-01-26  1998
 
     """
-    return
+    respuesta = tbl0.assign(year=tbl0['_c3'].str.split('-').str[0])
+    return respuesta
 
 
 def pregunta_10():
-    """
-    Construya una tabla que contenga _c1 y una lista separada por ':' de los valores de
-    la columna _c2 para el archivo `tbl0.tsv`.
+    valores = tbl0[['_c1', '_c2']].groupby(['_c1'])['_c2'].apply(list).tolist()
+    c2 = []
 
-    Rta/
-                                   _c1
-      _c0
-    0   A              1:1:2:3:6:7:8:9
-    1   B                1:3:4:5:6:8:9
-    2   C                    0:5:6:7:9
-    3   D                  1:2:3:5:5:7
-    4   E  1:1:2:3:3:4:5:5:5:6:7:8:8:9
-    """
-    return
+    for letra in valores:
+        texto = ''
+        for valor in sorted(letra):
+            texto += f'{valor}:'
+        
+        c2.append(texto[:-1])
+
+    return pd.DataFrame({
+        '_c2': c2
+    }, index = pd.Series(['A', 'B', 'C', 'D', 'E'], name='_c1'))
 
 
 def pregunta_11():
-    """
-    Construya una tabla que contenga _c0 y una lista separada por ',' de los valores de
-    la columna _c4 del archivo `tbl1.tsv`.
+    valores = tbl1.groupby(['_c0'])['_c4'].apply(list).tolist()
+    c0 = tbl1['_c0'].unique().tolist()
+    c4 = []
 
-    Rta/
-        _c0      _c4
-    0     0    b,f,g
-    1     1    a,c,f
-    2     2  a,c,e,f
-    3     3      a,b
-    ...
-    37   37  a,c,e,f
-    38   38      d,e
-    39   39    a,d,f
-    """
-    return
+    for numero in valores:
+        texto = ''
+        for valor in sorted(numero):
+            texto += f'{valor},'
+        
+        c4.append(texto[:-1])
+
+    return pd.DataFrame({
+        '_c0': c0,
+        '_c4': c4
+    })
 
 
 def pregunta_12():
-    """
-    Construya una tabla que contenga _c0 y una lista separada por ',' de los valores de
-    la columna _c5a y _c5b (unidos por ':') de la tabla `tbl2.tsv`.
+    c5a = tbl2.groupby(['_c0'])['_c5a'].apply(list).tolist()
+    c5b = tbl2.groupby(['_c0'])['_c5b'].apply(list).tolist()
+    c0 = tbl1['_c0'].unique().tolist()
+    
+    c5 = []
 
-    Rta/
-        _c0                                  _c5
-    0     0        bbb:0,ddd:9,ggg:8,hhh:2,jjj:3
-    1     1              aaa:3,ccc:2,ddd:0,hhh:9
-    2     2              ccc:6,ddd:2,ggg:5,jjj:1
-    ...
-    37   37                    eee:0,fff:2,hhh:6
-    38   38                    eee:0,fff:9,iii:2
-    39   39                    ggg:3,hhh:8,jjj:5
-    """
-    return
+    for i in range(len(c5a)):
+        x = []
+
+        for j in range(len(c5a[i])):
+            x.append(f'{c5a[i][j]}:{c5b[i][j]}')
+        
+        texto = ''
+
+        for valor in sorted(x):
+            texto += f'{valor},'
+
+        c5.append(texto[:-1])
+
+    return pd.DataFrame({
+        '_c0': c0,
+        '_c5': c5
+    })
 
 
 def pregunta_13():
@@ -217,4 +236,5 @@ def pregunta_13():
     E    275
     Name: _c5b, dtype: int64
     """
-    return
+    respuesta = tbl0.merge(tbl2, on='_c0').groupby('_c1').sum()['_c5b']
+    return respuesta
